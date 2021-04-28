@@ -8,7 +8,7 @@ import {
     login
 } from '../../utils/detect-auth';
 
-export const loginUser = createAsyncThunk('users/login', async (values, history, setSubmitting, {
+export const loginUser = createAsyncThunk('users/login', async (values, {
     rejectWithValue
 }) => {
     try {
@@ -24,8 +24,6 @@ export const loginUser = createAsyncThunk('users/login', async (values, history,
 
         if (response.status === 200) {
             login(data.token);
-            history.push('/dashboard')
-            setSubmitting(false)
             return data;
         } else {
             return rejectWithValue(data);
@@ -35,23 +33,50 @@ export const loginUser = createAsyncThunk('users/login', async (values, history,
     }
 });
 
+
+export const fetchUserBytoken = createAsyncThunk(
+    'users/fetchUserByToken',
+    async ({
+        token
+    }, thunkAPI) => {
+        try {
+            const response = await fetch(
+                'http://localhost:3000/api/v1/currentuser', {
+                    headers: {
+						Authorization: `Bearer ${token}`
+					}
+                }
+            );
+            let data = await response.json();
+            console.log('data', data, response.status);
+
+            if (response.status === 200) {
+                return {
+                    ...data
+                };
+            } else {
+                return thunkAPI.rejectWithValue(data);
+            }
+        } catch (e) {
+            console.log('Error', e.response.data);
+            return thunkAPI.rejectWithValue(e.response.data);
+        }
+    }
+);
+
+
+const initialState = {
+    user: null,
+    isFetching: false,
+    isSuccess: false,
+    isError: false,
+    errorMessage: ''
+}
+
 export const userSlice = createSlice({
     name: 'user',
-    initialState: {
-        user: null,
-        isFetching: false,
-        isSuccess: false,
-        isError: false,
-        errorMessage: ''
-    },
+    initialState,
     reducer: {
-        clearState: (state) => {
-            state.isError = false;
-            state.isSuccess = false;
-            state.isFetching = false;
-
-            return state;
-        }
     },
     extraReducers: {
         [loginUser.fulfilled]: (state, {
@@ -72,12 +97,26 @@ export const userSlice = createSlice({
         },
         [loginUser.pending]: (state) => {
             state.isFetching = true;
-        }
+        },
+        [fetchUserBytoken.pending]: (state) => {
+            state.isFetching = true;
+        },
+        [fetchUserBytoken.fulfilled]: (state, {
+            payload
+        }) => {
+            state.isFetching = false;
+            state.isSuccess = true;
+            state.user = payload;
+        },
+        [fetchUserBytoken.rejected]: (state, {payload}) => {
+            console.log('fetchUserBytoken');
+            state.isFetching = false;
+            state.isError = true;
+            state.errorMessage = payload
+        },
     }
 });
 
 export const {
-    clearState
+    reset
 } = userSlice.actions;
-
-export const userSelector = (state) => state.user;

@@ -1,14 +1,10 @@
 import React, { Fragment } from 'react';
 import { Formik, Form, Field } from 'formik';
-import { useHistory } from 'react-router-dom';
 import { Input, Button, Stack } from '@chakra-ui/react';
 
 // utils
-import { login } from '../../utils/detect-auth';
 
 export function SignForm() {
-	const history = useHistory();
-
 	return (
 		<Fragment>
 			<Formik

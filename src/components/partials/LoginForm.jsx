@@ -11,13 +11,25 @@ export function LoginForm() {
 	const history = useHistory();
 	const dispatch = useDispatch();
 
+	const { user } = useSelector((state) => state);
+
+	useEffect(
+		() => {
+			if (user.isSuccess) {
+				toast.success('Success');
+				history.push('/dashboard');
+			}
+		},
+		[ user.isSuccess, history ]
+	);
+
 	return (
 		<Fragment>
 			<Formik
 				initialValues={{ email: '', password: '' }}
 				onSubmit={(values, { setSubmitting }) => {
 					setTimeout(() => {
-						dispatch(loginUser(values, history, setSubmitting));
+						dispatch(loginUser(values));
 					}, 400);
 				}}
 			>
