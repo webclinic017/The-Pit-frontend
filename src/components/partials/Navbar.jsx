@@ -17,8 +17,13 @@ import {
 	useDisclosure
 } from '@chakra-ui/react';
 
+// components
+import { LoginForm } from './LoginForm';
+import { SignForm } from './SignForm';
+
 export function Navbar() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen: isOpen1, onOpen: onOpen1, onClose: onClose1 } = useDisclosure();
 	const firstField = React.useRef();
 
 	return (
@@ -38,20 +43,15 @@ export function Navbar() {
 				</Button>
 				<Drawer isOpen={isOpen} placement="right" initialFocusRef={firstField} onClose={onClose}>
 					<DrawerOverlay>
-						<DrawerContent>
+						<DrawerContent bg="#4347E3">
 							<DrawerCloseButton />
-							<DrawerHeader borderBottomWidth="1px">Create a new account</DrawerHeader>
+							<DrawerHeader borderBottomWidth="1px">Login</DrawerHeader>
 
 							<DrawerBody>
-								<Stack spacing="24px" />
+								<Stack spacing="24px">
+									<LoginForm />
+								</Stack>
 							</DrawerBody>
-
-							<DrawerFooter borderTopWidth="1px">
-								<Button variant="outline" mr={3} onClick={onClose}>
-									Cancel
-								</Button>
-								<Button colorScheme="blue">Submit</Button>
-							</DrawerFooter>
 						</DrawerContent>
 					</DrawerOverlay>
 				</Drawer>
@@ -63,9 +63,24 @@ export function Navbar() {
 						backgroundColor: '#0D1431 !important',
 						border: '1px solid #4347E3'
 					}}
+					onClick={onOpen1}
 				>
 					Sign up
 				</Button>
+				<Drawer isOpen={isOpen1} placement="right" initialFocusRef={firstField} onClose={onClose1}>
+					<DrawerOverlay>
+						<DrawerContent bg="#4347E3">
+							<DrawerCloseButton />
+							<DrawerHeader borderBottomWidth="1px">Create a new account</DrawerHeader>
+
+							<DrawerBody>
+								<Stack spacing="24px">
+									<SignForm />
+								</Stack>
+							</DrawerBody>
+						</DrawerContent>
+					</DrawerOverlay>
+				</Drawer>
 			</HStack>
 		</Flex>
 	);

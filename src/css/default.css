@@ -35,3 +35,12 @@ img {
     object-fit: cover;
     outline: none
 }
+
+.form-input {
+    background-color: "#0151C38 !important";
+	border-radius:"10px";
+}
+
+.css-1xp7ed8  {
+    border-bottom: none;
+}
