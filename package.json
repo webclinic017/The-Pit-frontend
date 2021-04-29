@@ -6,12 +6,20 @@
     "@chakra-ui/react": "^1.6.0",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@fortawesome/react-fontawesome": "^0.1.14",
     "@reduxjs/toolkit": "^1.5.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "d3-dsv": "^2.0.0",
+    "d3-format": "^3.0.0",
+    "d3-scale": "^3.3.0",
+    "d3-time-format": "^3.0.0",
     "formik": "^2.2.6",
     "framer-motion": "^4",
+    "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hot-toast": "^1.0.2",
@@ -20,6 +28,7 @@
     "react-scripts": "4.0.3",
     "react-stockcharts": "^0.7.8",
     "redux": "^4.1.0",
+    "shortid": "^2.2.16",
     "web-vitals": "^1.0.1",
     "yup": "^0.32.9"
   },
@@ -46,5 +55,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "actioncable": "^5.2.5"
   }
 }

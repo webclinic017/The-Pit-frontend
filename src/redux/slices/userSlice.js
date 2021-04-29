@@ -38,7 +38,7 @@ export const fetchUserBytoken = createAsyncThunk(
     'users/fetchUserByToken',
     async ({
         token
-    }, thunkAPI) => {
+    }, {rejectWithValue}) => {
         try {
             const response = await fetch(
                 'http://localhost:3000/api/v1/currentuser', {
@@ -47,19 +47,17 @@ export const fetchUserBytoken = createAsyncThunk(
 					}
                 }
             );
-            let data = await response.json();
-            console.log('data', data, response.status);
+            const data = await response.json();
 
             if (response.status === 200) {
                 return {
                     ...data
                 };
             } else {
-                return thunkAPI.rejectWithValue(data);
+                return rejectWithValue(data);
             }
-        } catch (e) {
-            console.log('Error', e.response.data);
-            return thunkAPI.rejectWithValue(e.response.data);
+        } catch (err) {
+            return rejectWithValue(err.response.data);
         }
     }
 );

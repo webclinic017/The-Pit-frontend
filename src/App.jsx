@@ -12,7 +12,7 @@ import { fetchUserBytoken } from './redux/slices/userSlice';
 // pages
 import Home from './pages/Home';
 import DashBoard from './pages/DashBoard';
-
+import ChatRoom from './pages/ChatRoom';
 // utils
 import { isLogin } from './utils/detect-auth';
 
@@ -44,6 +44,7 @@ export default function App() {
 				<Switch>
 					<PublicRoute restricted={false} component={Home} path="/" exact />
 					<PrivateRoute component={DashBoard} path="/dashboard" exact />
+					<PrivateRoute component={ChatRoom} path="/dashboard/chatrooms" exact />
 				</Switch>
 			</Router>
 		</ChakraProvider>
