@@ -1,7 +1,6 @@
-import { useState, Fragment, useEffect } from 'react';
+import { useState, Fragment } from 'react';
 import { Grid, Box, Heading, Flex, Input, Stack } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import actioncable from 'actioncable';
 
 const variants = {
 	open: {

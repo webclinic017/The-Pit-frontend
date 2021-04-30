@@ -80,7 +80,6 @@ export const userSlice = createSlice({
         [loginUser.fulfilled]: (state, {
             payload
         }) => {
-            console.log(payload);
             state.user = payload;
             state.isFetching = false;
             state.isSuccess = true;
@@ -107,7 +106,6 @@ export const userSlice = createSlice({
             state.user = payload;
         },
         [fetchUserBytoken.rejected]: (state, {payload}) => {
-            console.log('fetchUserBytoken');
             state.isFetching = false;
             state.isError = true;
             state.errorMessage = payload

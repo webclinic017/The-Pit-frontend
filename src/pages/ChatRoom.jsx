@@ -1,15 +1,5 @@
-import { useEffect } from 'react';
-import { Box } from '@chakra-ui/react';
-
-// components
-import { MessageList } from '../components/dashboard/messages/MessageList';
-import { ChatRoomList } from '../components/dashboard/messages/ChatRoomList';
+import { Grid } from '@chakra-ui/react';
 
 export default function ChatRoom() {
-	return (
-		<Box>
-			<ChatRoomList />
-			<MessageList />
-		</Box>
-	);
+	return <Grid gridTemplateColumns="30% 1fr" w="100%" />;
 }
