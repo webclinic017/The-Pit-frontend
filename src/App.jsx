@@ -24,11 +24,9 @@ export default function App() {
 		() => {
 			if (user.isError) {
 				toast.error(`unauthorized`);
-			} else if (user.isSuccess || isLogin()) {
-				toast.success('Welcome Back!');
 			}
 		},
-		[ user.isError, user.errorMessage, user.isSuccess ]
+		[ user.isError ]
 	);
 
 	useEffect(

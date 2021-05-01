@@ -87,7 +87,7 @@ export const signupUser = createAsyncThunk('user/signup', async (values , { reje
 })
 
 const initialState = {
-    user: null,
+    user: { name: '', email: '', image: '', balance: null},
     isFetching: false,
     isSuccess: false,
     isError: false,
