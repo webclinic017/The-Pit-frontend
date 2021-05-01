@@ -62,6 +62,29 @@ export const fetchUserBytoken = createAsyncThunk(
     }
 );
 
+export const signupUser = createAsyncThunk('user/signup', async (values , { rejectWithValue }) => {
+    try {
+        const res = await fetch('http://localhost:3000/api/v1/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(values)
+
+        })
+        const data = await res.json();
+        
+        if (res.status === 200) {
+            login(data.token);
+            return data;
+        } else {
+            return rejectWithValue(data);
+        }
+
+    } catch (err) {
+        return rejectWithValue(err.response.data)
+    }
+})
 
 const initialState = {
     user: null,
