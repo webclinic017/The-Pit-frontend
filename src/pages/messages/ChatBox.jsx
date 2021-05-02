@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { Textarea } from '@chakra-ui/react';
+import { Input } from '@chakra-ui/react';
 
 export function ChatBox({ text, handleTextChange }) {
 	return (
 		<Fragment>
-			<Textarea
+			<Input
 				color="#fff"
 				type="text"
 				value={text}

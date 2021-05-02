@@ -20,6 +20,9 @@ html, body {
     position: relative;
     overflow-x:hidden;
 }
+li {
+    list-style-type: none;
+}
 
 ::-webkit-scrollbar {
     width: 0;  /* Remove scrollbar space */
@@ -44,3 +47,4 @@ img {
 .css-1xp7ed8  {
     border-bottom: none;
 }
+
