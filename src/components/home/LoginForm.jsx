@@ -1,27 +1,14 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { Formik, Form, Field } from 'formik';
 import { useHistory } from 'react-router-dom';
 import { FormControl, Input, Button, Stack } from '@chakra-ui/react';
-import { useDispatch, useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
 // redux
-import { loginUser } from '../../redux/slices/userSlice';
+import { loginUser } from '../../redux/actions/users';
 
 export function LoginForm() {
 	const history = useHistory();
 	const dispatch = useDispatch();
-
-	const { user } = useSelector((state) => state);
-
-	useEffect(
-		() => {
-			if (user.isSuccess) {
-				toast.success('Success');
-				history.push('/dashboard');
-			}
-		},
-		[ user.isSuccess, history ]
-	);
 
 	return (
 		<Fragment>
@@ -29,7 +16,7 @@ export function LoginForm() {
 				initialValues={{ email: '', password: '' }}
 				onSubmit={(values, { setSubmitting }) => {
 					setTimeout(() => {
-						dispatch(loginUser(values));
+						dispatch(loginUser(values, history, setSubmitting));
 					}, 400);
 				}}
 			>

@@ -1,16 +1,23 @@
 import React, { Fragment } from 'react';
 import { Formik, Form, Field } from 'formik';
 import { Input, Button, Stack } from '@chakra-ui/react';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
-// utils
+// redux
+import { signupUser } from '../../redux/actions/users';
 
 export function SignForm() {
+	const dispatch = useDispatch();
+	const history = useHistory();
 	return (
 		<Fragment>
 			<Formik
 				initialValues={{ name: '', email: '', password: '' }}
 				onSubmit={(values, { setSubmitting }) => {
-					setTimeout(() => {}, 400);
+					setTimeout(() => {
+						dispatch(signupUser(values, history, setSubmitting));
+					}, 400);
 				}}
 			>
 				{({ isSubmitting, handleChange }) => (

@@ -17,7 +17,7 @@ function CandleStickChart(props) {
 	};
 	return (
 		<ChartCanvas
-			height={700}
+			height={500}
 			ratio={ratio}
 			width={width}
 			margin={{ left: 50, right: 50, top: 10, bottom: 30 }}
