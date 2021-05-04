@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { useRef, Fragment, useState, useEffect } from 'react';
 import {
 	Grid,
 	Image,
@@ -12,9 +12,18 @@ import {
 	ButtonGroup,
 	Button,
 	Text,
-	VStack
+	VStack,
+	Table,
+	Thead,
+	Tbody,
+	Tfoot,
+	Tr,
+	Th,
+	Td,
+	TableCaption
 } from '@chakra-ui/react';
-import { HelpCircle, Bell, Settings } from 'react-feather';
+import Pusher from 'pusher-js';
+import { HelpCircle, Bell, Settings, DollarSign } from 'react-feather';
 import { Formik, Field, Form } from 'formik';
 import TradingViewWidget, { Themes } from 'react-tradingview-widget';
 // component
@@ -24,11 +33,53 @@ import SmallChart from '../components/chart/SmallChart';
 import userImage from '../img/user.svg';
 
 export default function DashBoard() {
+	const [ pairs, setPairs ] = useState([]);
+	const [ sorted, setSorted ] = useState([]);
+
+	let _isMounted = useRef(false);
+
+	useEffect(
+		() => {
+			_isMounted.current = true;
+
+			const pusher = new Pusher(`b8f20a3d52d39b9262c2`, {
+				cluster: 'us2',
+				encrypted: true
+			});
+			const ticker = pusher.subscribe('ticker');
+
+			ticker.bind('tick', (data) => {
+				// setPairs(data);
+			});
+
+			if (_isMounted && pairs.length === 0) {
+				fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
+			}
+
+			// setInterval(() => {
+			// 	fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
+			// }, 40000);
+
+			/* 
+				set the sorted
+			*/
+			const newSorted = pairs.map((tick) => tick.pair);
+			setSorted(newSorted);
+
+			return () => (_isMounted.current = false);
+		},
+		[ pairs.length, pairs ]
+	);
+	/* 
+			unqiue array
+		*/
+	const selectSort = [ ...new Set(sorted) ];
+
 	return (
 		<Fragment>
 			<Grid h="100vh" gridTemplateRows="8% 1fr">
 				<Flex
-					borderBottm="3px solid #ccc"
+					borderBottom="2px solid #37373B"
 					padding="1em 2em"
 					justifyContent="space-between"
 					alignItems="center"
@@ -46,7 +97,15 @@ export default function DashBoard() {
 							borderColor="transparent"
 							color="white"
 							placeholder="USD/EUR"
-						/>
+						>
+							{selectSort.map((pair) => {
+								return (
+									<Fragment key={pair}>
+										<option value={pair}>{pair}</option>
+									</Fragment>
+								);
+							})}
+						</Select>
 						<HStack ml="2em" spacing="34px">
 							<VStack>
 								<Text fontWeight="bold" color="#D3504C" fontSize=".8em">
@@ -104,11 +163,140 @@ export default function DashBoard() {
 						<Settings size="1.2em" />
 					</HStack>
 				</Flex>
-				<Grid gridTemplateColumns="1fr 40%">
-					<Box bg="red" />
+				<Grid gridTemplateColumns="1fr 40%" bg="#1E2025">
+					<Grid gridTemplateRows="70% 30%">
+						<Grid gridTemplateColumns="30% 1fr">
+							<Box padding="2em">
+								<Input
+									w="140px"
+									border="none"
+									bg="#2C2E36  !important"
+									h="40px"
+									color="#677D9B"
+									as={Input}
+									type="text"
+									name="search"
+									placeholder="search"
+								/>
+								<Flex mt="1em" textAlign="center" justifyContent="space-between" w="100%">
+									<Text color="#677D9B ">Price</Text>
+									<Text color="#677D9B ">Last</Text>
+									<Text color="#677D9B ">Change</Text>
+								</Flex>
+							</Box>
+							<Box>
+								<TradingViewWidget symbol="NASDAQ:AAPL" theme={Themes.DARK} locale="fr" autosize />
+							</Box>
+						</Grid>
+						<Box padding="2em" border="2px solid #37373B">
+							<HStack spacing="30px">
+								<Text fontSize="1em" fontWeight="bold">
+									Open Orders
+								</Text>
+								<Text fontSize="1em" fontWeight="bold">
+									Order History
+								</Text>
+								<Text fontSize="1em" fontWeight="bold">
+									Trade History
+								</Text>
+								<Text fontSize="1em" fontWeight="bold">
+									Funds
+								</Text>
+								<Text fontSize="1em" fontWeight="bold">
+									Staking Vault
+								</Text>
+								<Text fontSize="1em" fontWeight="bold">
+									Activity
+								</Text>
+							</HStack>
+							<Box mt="1em">
+								<Table variant="unstyled">
+									<Thead>
+										<Tr>
+											<Th>Date</Th>
+											<Th>Price</Th>
+											<Th>Type</Th>
+											<Th>Side</Th>
+											<Th>Price</Th>
+											<Th>Amount</Th>
+											<Th>Filled</Th>
+											<Th>Total</Th>
+											<Th>Tigger Conditions</Th>
+										</Tr>
+									</Thead>
+									<Tbody>
+										<Tr>
+											<Td>inches</Td>
+											<Td>millimetres (mm)</Td>
+											<Td isNumeric>25.4</Td>
+											<Td isNumeric>25.4</Td>
+											<Td isNumeric>25.4</Td>
+											<Td isNumeric>25.4</Td>
+											<Td isNumeric>25.4</Td>
+											<Td isNumeric>25.4</Td>
+											<Td isNumeric>25.4</Td>
+										</Tr>
+									</Tbody>
+								</Table>
+							</Box>
+						</Box>
+					</Grid>
 					<Grid gridTemplateColumns="1fr 1fr" bg="#1E2025">
-						<Box bg="blue" />
-						<Grid gridTemplateRows="20% 30% 50%">
+						<Grid border="2px solid #37373B" gridTemplateRows="20% 50% 30%" bg="#1E2025">
+							<Box>
+								<Table variant="unstyled">
+									<Thead>
+										<Tr color=" #677D9B">
+											<Th>Price(USD)</Th>
+											<Th>Amount(BTC)</Th>
+											<Th>Total</Th>
+										</Tr>
+									</Thead>
+									<Tbody>
+										<Tr bg="#462523" h="10px">
+											<Td>1.2342</Td>
+											<Td>0.0342</Td>
+											<Td isNumeric>2341341</Td>
+										</Tr>
+									</Tbody>
+								</Table>
+							</Box>
+							<Box>
+								<Table variant="unstyled">
+									<Thead>
+										<Tr color=" #677D9B">
+											<Th>7,234</Th>
+										</Tr>
+									</Thead>
+									<Tbody>
+										<Tr bg="#2B3D22" h="10px">
+											<Td>1.2342</Td>
+											<Td>0.0342</Td>
+											<Td isNumeric>2341341</Td>
+										</Tr>
+									</Tbody>
+								</Table>
+							</Box>
+							<Box border="2px solid #37373B" borderRight="none" borderLeft="none" borderBottom="none">
+								<Table variant="unstyled">
+									<Thead>
+										<Tr color=" #677D9B">
+											<Th>Price(USD)</Th>
+											<Th>Amount(BTC)</Th>
+											<Th>Total</Th>
+										</Tr>
+									</Thead>
+									<Tbody>
+										<Tr h="10px">
+											<Td>1.2342</Td>
+											<Td>0.0342</Td>
+											<Td isNumeric>2341341</Td>
+										</Tr>
+									</Tbody>
+								</Table>
+							</Box>
+						</Grid>
+						<Grid gridTemplateRows="20% 50% 30%">
 							<Box border="2px solid #37373B" bg="#1E2025" borderRight="none !important" padding="2em">
 								<Flex justifyContent="space-between">
 									<Text fontSize="1.2em" fontWeight="bold">
@@ -157,28 +345,70 @@ export default function DashBoard() {
 									{({ isSubmitting, handleChange }) => (
 										<Form>
 											<Stack spacing="24px" mt="2em">
+												<Box color="#677D9B">
+													<HStack>
+														<DollarSign size="1.2em" />
+														<Text fontWeight="bold">.234231231 USD</Text>
+													</HStack>
+												</Box>
 												<Input
-													className="form-input"
+													border="1px solid #677D9B !important"
+													bg="transparent !important"
+													h="40px"
 													as={Input}
-													type="email"
-													name="email"
+													type="text"
+													name="price"
 													onChange={handleChange}
-													placeholder="email"
+													placeholder="Price"
 												/>
 												<Input
+													border="1px solid #677D9B !important"
+													bg="transparent !important"
+													h="40px"
 													as={Input}
-													type="password"
-													name="password"
+													type="text"
+													name="Amount"
 													onChange={handleChange}
-													placeholder="password"
+													placeholder="Amount"
 												/>
-												<Button bg="#0D1431" type="submit" disabled={isSubmitting}>
-													Submit
+												<Input
+													border="1px solid #677D9B !important"
+													bg="transparent !important"
+													h="40px"
+													as={Input}
+													type="text"
+													name="Total"
+													onChange={handleChange}
+													placeholder="Total"
+												/>
+												<Button
+													color="#90D647"
+													w="100%"
+													bg="#2B3D22"
+													type="submit"
+													disabled={isSubmitting}
+												>
+													Buy
 												</Button>
 											</Stack>
 										</Form>
 									)}
 								</Formik>
+							</Box>
+							<Box border="1px solid #37373B">
+								<Box padding="2em">
+									<Text fontSize="1em" fontWeight="bold">
+										Balance
+									</Text>
+									<HStack justifyContent="space-evenly" mt="1em">
+										<Button bg="transparent" color=" #90D647" border="1px solid #90D647" w="100%">
+											Deposit
+										</Button>
+										<Button bg="transparent" w="100%" color="#304226" border="1px solid #304226">
+											Deposit
+										</Button>
+									</HStack>
+								</Box>
 							</Box>
 						</Grid>
 					</Grid>
