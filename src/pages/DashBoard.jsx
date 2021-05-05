@@ -1,7 +1,6 @@
 import { useRef, Fragment, useState, useEffect } from 'react';
 import {
 	Grid,
-	Image,
 	HStack,
 	Select,
 	Heading,
@@ -16,25 +15,25 @@ import {
 	Table,
 	Thead,
 	Tbody,
-	Tfoot,
 	Tr,
 	Th,
-	Td,
-	TableCaption
+	Td
 } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
 import Pusher from 'pusher-js';
 import { HelpCircle, Bell, Settings, DollarSign } from 'react-feather';
-import { Formik, Field, Form } from 'formik';
+import { Formik, Form } from 'formik';
 import TradingViewWidget, { Themes } from 'react-tradingview-widget';
 // component
-import { SideBar } from '../components/dashboard/SideBar';
 import SmallChart from '../components/chart/SmallChart';
-// image
-import userImage from '../img/user.svg';
 
 export default function DashBoard() {
+	const user = useSelector((state) => state.users);
 	const [ pairs, setPairs ] = useState([]);
 	const [ sorted, setSorted ] = useState([]);
+	const [ startWS, setStartWS ] = useState([]);
+	const [ id, setId ] = useState(2);
+	const [ currentPrice, setCurrentPrice ] = useState(Number);
 
 	let _isMounted = useRef(false);
 
@@ -46,20 +45,18 @@ export default function DashBoard() {
 				cluster: 'us2',
 				encrypted: true
 			});
-			const ticker = pusher.subscribe('ticker');
-
-			ticker.bind('tick', (data) => {
-				// setPairs(data);
-			});
 
 			if (_isMounted && pairs.length === 0) {
 				fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
 			}
 
-			// setInterval(() => {
-			// 	fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
-			// }, 40000);
+			if (pairs.length !== 0) {
+				setInterval(() => {
+					fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
+				}, 40000);
+			}
 
+			if (pairs.length !== 0) return setCurrentPrice(pairs.slice(-1)[0].c);
 			/* 
 				set the sorted
 			*/
@@ -68,12 +65,44 @@ export default function DashBoard() {
 
 			return () => (_isMounted.current = false);
 		},
-		[ pairs.length, pairs ]
+		[ pairs.length, pairs, startWS.length ]
 	);
+
+	useEffect(
+		() => {
+			setId((prev) => {
+				if (typeof user.user.id === 'number') return parseInt(user.user.id);
+			});
+		},
+		[ user.user.id ]
+	);
+
+	console.log(currentPrice);
 	/* 
 			unqiue array
 		*/
 	const selectSort = [ ...new Set(sorted) ];
+
+	const handleGlobalChange = (e) => {
+		console.log(e.target.value);
+		// const ticker = pusher.subscribe('ticker');
+
+		// ticker.bind('tick', (data) => {
+		// 	// console.log(data);
+		// 	// if (data.pair === e.target.value) return setStartWS([ ...startWS, data ]);
+		// });
+	};
+
+	let average = (array) => array.reduce((a, b) => a + b) / array.length;
+	let avgHigh = pairs.map((pair) => parseFloat(pair.h));
+	let avgLow = pairs.map((pair) => parseFloat(pair.l));
+	let close = pairs.map((pair) => parseFloat(pair.c));
+	let avgVolume;
+
+	if (close.length !== 0) {
+		avgVolume =
+			average(close) * parseFloat([ ...pairs ].splice(-1, 1)[0].s) / parseFloat([ ...pairs ].splice(-1, 1)[0].s);
+	}
 
 	return (
 		<Fragment>
@@ -96,6 +125,7 @@ export default function DashBoard() {
 							bg="transparent"
 							borderColor="transparent"
 							color="white"
+							onChange={handleGlobalChange}
 							placeholder="USD/EUR"
 						>
 							{selectSort.map((pair) => {
@@ -109,10 +139,10 @@ export default function DashBoard() {
 						<HStack ml="2em" spacing="34px">
 							<VStack>
 								<Text fontWeight="bold" color="#D3504C" fontSize=".8em">
-									1.23454
+									{pairs.length !== 0 && pairs.slice(-1)[0].c}
 								</Text>
 								<Text color="#657A95" fontWeight="bold" mt="0 !important" fontSize=".8em">
-									$1.23454
+									${pairs.length !== 0 && pairs.slice(-1)[0].c}
 								</Text>
 							</VStack>
 							<Box>
@@ -131,7 +161,7 @@ export default function DashBoard() {
 										24h High
 									</Text>
 									<Text mt="0 !important" fontWeight="bold" color="#ffffff" fontSize=".8em">
-										1.34323
+										{pairs.length !== 0 && average(avgHigh).toFixed(5)}
 									</Text>
 								</VStack>
 							</Box>
@@ -141,7 +171,7 @@ export default function DashBoard() {
 										24h Low
 									</Text>
 									<Text mt="0 !important" fontWeight="bold" color="#ffffff" fontSize=".8em">
-										1.34323
+										{pairs.length !== 0 && average(avgLow).toFixed(5)}
 									</Text>
 								</VStack>
 							</Box>
@@ -151,7 +181,7 @@ export default function DashBoard() {
 										24h Volume
 									</Text>
 									<Text mt="0 !important" fontWeight="bold" color="#ffffff" fontSize=".8em">
-										1.34323
+										{pairs.length !== 0 && avgVolume.toFixed(5)}
 									</Text>
 								</VStack>
 							</Box>
@@ -185,7 +215,7 @@ export default function DashBoard() {
 								</Flex>
 							</Box>
 							<Box>
-								<TradingViewWidget symbol="NASDAQ:AAPL" theme={Themes.DARK} locale="fr" autosize />
+								<TradingViewWidget symbol="EUR/USD" theme={Themes.DARK} locale="fr" autosize />
 							</Box>
 						</Grid>
 						<Box padding="2em" border="2px solid #37373B">
@@ -242,57 +272,35 @@ export default function DashBoard() {
 						</Box>
 					</Grid>
 					<Grid gridTemplateColumns="1fr 1fr" bg="#1E2025">
-						<Grid border="2px solid #37373B" gridTemplateRows="20% 50% 30%" bg="#1E2025">
-							<Box>
-								<Table variant="unstyled">
-									<Thead>
-										<Tr color=" #677D9B">
-											<Th>Price(USD)</Th>
-											<Th>Amount(BTC)</Th>
-											<Th>Total</Th>
-										</Tr>
-									</Thead>
-									<Tbody>
-										<Tr bg="#462523" h="10px">
-											<Td>1.2342</Td>
-											<Td>0.0342</Td>
-											<Td isNumeric>2341341</Td>
-										</Tr>
-									</Tbody>
-								</Table>
+						<Grid border="2px solid #37373B" gridTemplateRows="8% 70% 20%" bg="#1E2025">
+							<Box padding="1em 2em" bg="#1E2025">
+								<Flex mt="1em" textAlign="center" justifyContent="space-between" w="100%">
+									<Text fontSize="1em" fontWeight="bold" color="#677D9B ">
+										Close
+									</Text>
+									<Text fontSize="1em" fontWeight="bold" color="#677D9B ">
+										Open
+									</Text>
+									<Text fontSize="1em" fontWeight="bold" color="#677D9B ">
+										Low
+									</Text>
+								</Flex>
 							</Box>
-							<Box>
-								<Table variant="unstyled">
-									<Thead>
-										<Tr color=" #677D9B">
-											<Th>7,234</Th>
-										</Tr>
-									</Thead>
-									<Tbody>
-										<Tr bg="#2B3D22" h="10px">
-											<Td>1.2342</Td>
-											<Td>0.0342</Td>
-											<Td isNumeric>2341341</Td>
-										</Tr>
-									</Tbody>
-								</Table>
+							<Box padding="1em 2em" overflowY="scroll">
+								{[ ...pairs ].splice(1, 30).map((pair) => {
+									return (
+										<Flex key={pair._id} textAlign="center" justifyContent="space-between" w="100%">
+											<Text>{pair.c}</Text>
+											<Text>{pair.o}</Text>
+											<Text>{pair.l}</Text>
+										</Flex>
+									);
+								})}
 							</Box>
 							<Box border="2px solid #37373B" borderRight="none" borderLeft="none" borderBottom="none">
 								<Table variant="unstyled">
-									<Thead>
-										<Tr color=" #677D9B">
-											<Th>Price(USD)</Th>
-											<Th>Amount(BTC)</Th>
-											<Th>Total</Th>
-										</Tr>
-									</Thead>
-									<Tbody>
-										<Tr h="10px">
-											<Td>1.2342</Td>
-											<Td>0.0342</Td>
-											<Td isNumeric>2341341</Td>
-										</Tr>
-									</Tbody>
+									<Thead />
+									<Tbody />
 								</Table>
 							</Box>
 						</Grid>
@@ -337,9 +345,18 @@ export default function DashBoard() {
 								</Flex>
 
 								<Formik
-									initialValues={{ email: '', password: '' }}
+									enableReinitialize={true}
+									initialValues={{
+										symbol: 'AUD/USD',
+										user_id: id,
+										qty: '',
+										take_profit: '',
+										avg_fill_price: currentPrice
+									}}
 									onSubmit={(values, { setSubmitting }) => {
-										setTimeout(() => {}, 400);
+										setTimeout(() => {
+											console.log(values);
+										}, 400);
 									}}
 								>
 									{({ isSubmitting, handleChange }) => (
@@ -348,7 +365,9 @@ export default function DashBoard() {
 												<Box color="#677D9B">
 													<HStack>
 														<DollarSign size="1.2em" />
-														<Text fontWeight="bold">.234231231 USD</Text>
+														<Text fontWeight="bold">
+															{pairs.length !== 0 && pairs.slice(-1)[0].c} USD
+														</Text>
 													</HStack>
 												</Box>
 												<Input
@@ -357,29 +376,20 @@ export default function DashBoard() {
 													h="40px"
 													as={Input}
 													type="text"
-													name="price"
+													name="qty"
 													onChange={handleChange}
-													placeholder="Price"
+													placeholder="quanlity"
 												/>
 												<Input
 													border="1px solid #677D9B !important"
 													bg="transparent !important"
 													h="40px"
-													as={Input}
-													type="text"
-													name="Amount"
+													type="number"
+													disabled
+													value={currentPrice}
+													name="avg_fill_price"
 													onChange={handleChange}
-													placeholder="Amount"
-												/>
-												<Input
-													border="1px solid #677D9B !important"
-													bg="transparent !important"
-													h="40px"
-													as={Input}
-													type="text"
-													name="Total"
-													onChange={handleChange}
-													placeholder="Total"
+													placeholder="current price"
 												/>
 												<Button
 													color="#90D647"
@@ -405,9 +415,21 @@ export default function DashBoard() {
 											Deposit
 										</Button>
 										<Button bg="transparent" w="100%" color="#304226" border="1px solid #304226">
-											Deposit
+											withdrawal
 										</Button>
 									</HStack>
+									<Box w="100%" mt="2em">
+										<VStack>
+											<Flex justifyContent="space-between" w="100%">
+												<Text color="#677D9B ">Account:</Text>
+												<Text>$100,000</Text>
+											</Flex>
+											<Flex justifyContent="space-between" w="100%">
+												<Text color="#677D9B ">Profit/Loss:</Text>
+												<Text>$50,000</Text>
+											</Flex>
+										</VStack>
+									</Box>
 								</Box>
 							</Box>
 						</Grid>
