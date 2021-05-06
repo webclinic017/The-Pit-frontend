@@ -1,4 +1,4 @@
-import { useRef, Fragment, useState, useEffect } from 'react';
+import React, { useRef, Fragment, useState, useEffect } from 'react';
 import {
 	Grid,
 	HStack,
@@ -16,24 +16,26 @@ import {
 	Thead,
 	Tbody,
 	Tr,
-	Th,
-	Td
+	Th
 } from '@chakra-ui/react';
 import { useSelector } from 'react-redux';
 import Pusher from 'pusher-js';
 import { HelpCircle, Bell, Settings, DollarSign } from 'react-feather';
 import { Formik, Form } from 'formik';
+import toast from 'react-hot-toast';
 import TradingViewWidget, { Themes } from 'react-tradingview-widget';
 // component
-import SmallChart from '../components/chart/SmallChart';
 
-export default function DashBoard() {
+function DashBoard() {
 	const user = useSelector((state) => state.users);
 	const [ pairs, setPairs ] = useState([]);
 	const [ sorted, setSorted ] = useState([]);
 	const [ startWS, setStartWS ] = useState([]);
 	const [ id, setId ] = useState(2);
 	const [ currentPrice, setCurrentPrice ] = useState(Number);
+	const format = (val) => `$` + val;
+	const parse = (val) => val.replace(/^\$/, '');
+	const [ dollar, setDollar ] = React.useState('10000');
 
 	let _isMounted = useRef(false);
 
@@ -50,11 +52,11 @@ export default function DashBoard() {
 				fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
 			}
 
-			if (pairs.length !== 0) {
-				setInterval(() => {
-					fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
-				}, 40000);
-			}
+			// if (pairs.length !== 0) {
+			// 	setInterval(() => {
+			// 		fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
+			// 	}, 40000);
+			// }
 
 			if (pairs.length !== 0) return setCurrentPrice(pairs.slice(-1)[0].c);
 			/* 
@@ -77,7 +79,6 @@ export default function DashBoard() {
 		[ user.user.id ]
 	);
 
-	console.log(currentPrice);
 	/* 
 			unqiue array
 		*/
@@ -223,19 +224,19 @@ export default function DashBoard() {
 								<Text fontSize="1em" fontWeight="bold">
 									Open Orders
 								</Text>
-								<Text fontSize="1em" fontWeight="bold">
+								<Text color="#677D9B " fontSize="1em" fontWeight="bold">
 									Order History
 								</Text>
-								<Text fontSize="1em" fontWeight="bold">
+								<Text color="#677D9B " fontSize="1em" fontWeight="bold">
 									Trade History
 								</Text>
-								<Text fontSize="1em" fontWeight="bold">
+								<Text color="#677D9B " fontSize="1em" fontWeight="bold">
 									Funds
 								</Text>
-								<Text fontSize="1em" fontWeight="bold">
+								<Text color="#677D9B " fontSize="1em" fontWeight="bold">
 									Staking Vault
 								</Text>
-								<Text fontSize="1em" fontWeight="bold">
+								<Text color="#677D9B " fontSize="1em" fontWeight="bold">
 									Activity
 								</Text>
 							</HStack>
@@ -243,31 +244,30 @@ export default function DashBoard() {
 								<Table variant="unstyled">
 									<Thead>
 										<Tr>
-											<Th>Date</Th>
-											<Th>Price</Th>
-											<Th>Type</Th>
-											<Th>Side</Th>
-											<Th>Price</Th>
-											<Th>Amount</Th>
-											<Th>Filled</Th>
-											<Th>Total</Th>
-											<Th>Tigger Conditions</Th>
+											<Th color="#677D9B ">Date</Th>
+											<Th color="#677D9B ">Price</Th>
+											<Th color="#677D9B ">Type</Th>
+											<Th color="#677D9B ">Side</Th>
+											<Th color="#677D9B ">Price</Th>
+											<Th color="#677D9B ">Amount</Th>
+											<Th color="#677D9B ">Filled</Th>
+											<Th color="#677D9B ">Total</Th>
+											<Th color="#677D9B ">Tigger Conditions</Th>
 										</Tr>
 									</Thead>
-									<Tbody>
-										<Tr>
-											<Td>inches</Td>
-											<Td>millimetres (mm)</Td>
-											<Td isNumeric>25.4</Td>
-											<Td isNumeric>25.4</Td>
-											<Td isNumeric>25.4</Td>
-											<Td isNumeric>25.4</Td>
-											<Td isNumeric>25.4</Td>
-											<Td isNumeric>25.4</Td>
-											<Td isNumeric>25.4</Td>
-										</Tr>
-									</Tbody>
 								</Table>
+							</Box>
+							<Box>
+								<HStack spacing="90px" justifyContent="center">
+									<Text>hello</Text>
+									<Text>hello</Text>
+									<Text>hello</Text>
+									<Text>hello</Text>
+									<Text>hello</Text>
+									<Text>hello</Text>
+									<Text>hello</Text>
+									<Text>hello</Text>
+								</HStack>
 							</Box>
 						</Box>
 					</Grid>
@@ -349,13 +349,31 @@ export default function DashBoard() {
 									initialValues={{
 										symbol: 'AUD/USD',
 										user_id: id,
-										qty: '',
-										take_profit: '',
+										qty: 10000,
+										take_profit: 0,
 										avg_fill_price: currentPrice
 									}}
-									onSubmit={(values, { setSubmitting }) => {
+									onSubmit={(values, { setSubmitting, resetForm }) => {
 										setTimeout(() => {
-											console.log(values);
+											fetch('http://localhost:3000/api/v1/stock_purchases', {
+												method: 'POST',
+												headers: {
+													'Content-Type': 'application/json'
+												},
+												body: JSON.stringify(values)
+											})
+												.then((res) => res.json())
+												.then(({ data }) => {
+													toast.success(`order filled - ${data.attributes.symbol}`);
+												})
+												.catch((err) => console.error(err));
+
+											setSubmitting(false);
+											resetForm({
+												symbol: '',
+												qty: '',
+												take_profit: ''
+											});
 										}, 400);
 									}}
 								>
@@ -371,14 +389,14 @@ export default function DashBoard() {
 													</HStack>
 												</Box>
 												<Input
-													border="1px solid #677D9B !important"
-													bg="transparent !important"
+													border="1px solid #677D9B  !important"
 													h="40px"
-													as={Input}
-													type="text"
+													borderRadius="md"
 													name="qty"
+													type="number"
+													step={1000}
 													onChange={handleChange}
-													placeholder="quanlity"
+													defaultValue={10000}
 												/>
 												<Input
 													border="1px solid #677D9B !important"
@@ -439,3 +457,5 @@ export default function DashBoard() {
 		</Fragment>
 	);
 }
+
+export default React.memo(DashBoard);
