@@ -14,9 +14,7 @@ import {
 	VStack,
 	Table,
 	Thead,
-	Tbody,
-	Tr,
-	Th
+	Tbody
 } from '@chakra-ui/react';
 import { useSelector } from 'react-redux';
 import Pusher from 'pusher-js';
@@ -30,9 +28,13 @@ function DashBoard() {
 	const user = useSelector((state) => state.users);
 	const [ pairs, setPairs ] = useState([]);
 	const [ sorted, setSorted ] = useState([]);
+	const [ orders, setOrders ] = useState([]);
+	const [ abs, setABs ] = useState([]);
+	// websocket
 	const [ startWS, setStartWS ] = useState([]);
 	const [ id, setId ] = useState(2);
 	const [ currentPrice, setCurrentPrice ] = useState(Number);
+	// number - maybe not needed
 	const format = (val) => `$` + val;
 	const parse = (val) => val.replace(/^\$/, '');
 	const [ dollar, setDollar ] = React.useState('10000');
@@ -46,6 +48,12 @@ function DashBoard() {
 			const pusher = new Pusher(`b8f20a3d52d39b9262c2`, {
 				cluster: 'us2',
 				encrypted: true
+			});
+
+			const ticker = pusher.subscribe('ticker');
+			ticker.bind('tick', (data) => {
+				console.log(data);
+				setABs((prevAbs) => [ ...prevAbs, data ]);
 			});
 
 			if (_isMounted && pairs.length === 0) {
@@ -69,7 +77,7 @@ function DashBoard() {
 		},
 		[ pairs.length, pairs, startWS.length ]
 	);
-
+	console.log(abs);
 	useEffect(
 		() => {
 			setId((prev) => {
@@ -79,9 +87,25 @@ function DashBoard() {
 		[ user.user.id ]
 	);
 
+	useEffect(
+		() => {
+			fetch('http://localhost:3000/api/v1/stock_purchases').then((res) => res.json()).then(({ data }) => {
+				let result = [];
+				data.map((purchase) => {
+					if (purchase.attributes['user-id'] === id) {
+						result.push(purchase);
+					}
+					return result;
+				});
+
+				setOrders(result);
+			});
+		},
+		[ id ]
+	);
 	/* 
 			unqiue array
-		*/
+	*/
 	const selectSort = [ ...new Set(sorted) ];
 
 	const handleGlobalChange = (e) => {
@@ -105,6 +129,8 @@ function DashBoard() {
 			average(close) * parseFloat([ ...pairs ].splice(-1, 1)[0].s) / parseFloat([ ...pairs ].splice(-1, 1)[0].s);
 	}
 
+	const handleCancel = (e) => {};
+
 	return (
 		<Fragment>
 			<Grid h="100vh" gridTemplateRows="8% 1fr">
@@ -127,7 +153,7 @@ function DashBoard() {
 							borderColor="transparent"
 							color="white"
 							onChange={handleGlobalChange}
-							placeholder="USD/EUR"
+							placeholder="AUD/USD"
 						>
 							{selectSort.map((pair) => {
 								return (
@@ -211,12 +237,28 @@ function DashBoard() {
 								/>
 								<Flex mt="1em" textAlign="center" justifyContent="space-between" w="100%">
 									<Text color="#677D9B ">Price</Text>
-									<Text color="#677D9B ">Last</Text>
-									<Text color="#677D9B ">Change</Text>
+									<Text color="#677D9B ">Ask</Text>
+									<Text color="#677D9B ">Bid</Text>
 								</Flex>
+								<Box mt="1em" h="100%" maxHeight="450px" overflowY="scroll" overflowX="hidden">
+									{abs.reverse().map((askBid, index) => {
+										return (
+											<Flex
+												key={index}
+												textAlign="center"
+												justifyContent="space-between"
+												w="100%"
+											>
+												<Text color="#fff">{pairs.length !== 0 && pairs.slice(-1)[0].c}</Text>
+												<Text color="#C85740">{askBid.a}</Text>
+												<Text color="#90D647 ">{askBid.b}</Text>
+											</Flex>
+										);
+									})}
+								</Box>
 							</Box>
 							<Box>
-								<TradingViewWidget symbol="EUR/USD" theme={Themes.DARK} locale="fr" autosize />
+								<TradingViewWidget symbol="AUD/USD" theme={Themes.DARK} locale="fr" autosize />
 							</Box>
 						</Grid>
 						<Box padding="2em" border="2px solid #37373B">
@@ -241,38 +283,59 @@ function DashBoard() {
 								</Text>
 							</HStack>
 							<Box mt="1em">
-								<Table variant="unstyled">
-									<Thead>
-										<Tr>
-											<Th color="#677D9B ">Date</Th>
-											<Th color="#677D9B ">Price</Th>
-											<Th color="#677D9B ">Type</Th>
-											<Th color="#677D9B ">Side</Th>
-											<Th color="#677D9B ">Price</Th>
-											<Th color="#677D9B ">Amount</Th>
-											<Th color="#677D9B ">Filled</Th>
-											<Th color="#677D9B ">Total</Th>
-											<Th color="#677D9B ">Tigger Conditions</Th>
-										</Tr>
-									</Thead>
-								</Table>
-							</Box>
-							<Box>
 								<HStack spacing="90px" justifyContent="center">
-									<Text>hello</Text>
-									<Text>hello</Text>
-									<Text>hello</Text>
-									<Text>hello</Text>
-									<Text>hello</Text>
-									<Text>hello</Text>
-									<Text>hello</Text>
-									<Text>hello</Text>
+									<Text w="100%" color="#677D9B ">
+										Date
+									</Text>
+									<Text w="100%" color="#677D9B ">
+										Pair
+									</Text>
+									<Text w="100%" color="#677D9B ">
+										Type
+									</Text>
+									<Text w="100%" color="#677D9B ">
+										Side
+									</Text>
+									<Text w="100%" color="#677D9B ">
+										Price
+									</Text>
+									<Text w="100%" color="#677D9B ">
+										Amount
+									</Text>
+									<Text w="100%" color="#677D9B ">
+										Filled
+									</Text>
+									<Text w="100%" color="#677D9B ">
+										Conditions
+									</Text>
 								</HStack>
+							</Box>
+							<Box mt="1em" overflowY="scroll !important" height="130px !important">
+								{orders.map((order) => {
+									return (
+										<HStack key={order.id} spacing="90px">
+											<Text color="#677D9B ">{order.attributes['created-at'].split('T')[0]}</Text>
+											<Text ml="3em !important">{order.attributes.symbol}</Text>
+											<Text ml="5em !important">Limit</Text>
+											<Text color="#90D647" ml="7em !important">
+												Buy
+											</Text>
+											<Text ml="7em !important">
+												{pairs.length !== 0 && pairs.slice(-1)[0].c}
+											</Text>
+											<Text>{order.attributes.qty}</Text>
+											<Text>{order.attributes['avg-fill-price']}</Text>
+											<Text onClick={handleCancel} ml="6em !important">
+												Cancel
+											</Text>
+										</HStack>
+									);
+								})}
 							</Box>
 						</Box>
 					</Grid>
 					<Grid gridTemplateColumns="1fr 1fr" bg="#1E2025">
-						<Grid border="2px solid #37373B" gridTemplateRows="8% 70% 20%" bg="#1E2025">
+						<Grid border="2px solid #37373B" gridTemplateRows="35% 35% 20%" bg="#1E2025">
 							<Box padding="1em 2em" bg="#1E2025">
 								<Flex mt="1em" textAlign="center" justifyContent="space-between" w="100%">
 									<Text fontSize="1em" fontWeight="bold" color="#677D9B ">
@@ -286,6 +349,9 @@ function DashBoard() {
 									</Text>
 								</Flex>
 							</Box>
+							<Box border="2px solid #37373B" borderLeft="none" borderRight="none">
+								hello
+							</Box>
 							<Box padding="1em 2em" overflowY="scroll">
 								{[ ...pairs ].splice(1, 30).map((pair) => {
 									return (
@@ -296,12 +362,6 @@ function DashBoard() {
 										</Flex>
 									);
 								})}
-							</Box>
-							<Box border="2px solid #37373B" borderRight="none" borderLeft="none" borderBottom="none">
-								<Table variant="unstyled">
-									<Thead />
-									<Tbody />
-								</Table>
 							</Box>
 						</Grid>
 						<Grid gridTemplateRows="20% 50% 30%">
@@ -364,7 +424,8 @@ function DashBoard() {
 											})
 												.then((res) => res.json())
 												.then(({ data }) => {
-													toast.success(`order filled - ${data.attributes.symbol}`);
+													toast.success(`Order Filled - ${data.attributes.symbol}`);
+													setOrders([ ...orders, data ]);
 												})
 												.catch((err) => console.error(err));
 
@@ -440,11 +501,7 @@ function DashBoard() {
 										<VStack>
 											<Flex justifyContent="space-between" w="100%">
 												<Text color="#677D9B ">Account:</Text>
-												<Text>$100,000</Text>
-											</Flex>
-											<Flex justifyContent="space-between" w="100%">
-												<Text color="#677D9B ">Profit/Loss:</Text>
-												<Text>$50,000</Text>
+												<Text>${}</Text>
 											</Flex>
 										</VStack>
 									</Box>
