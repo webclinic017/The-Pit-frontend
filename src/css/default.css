@@ -51,3 +51,23 @@ img {
 .carousel__inner-slide {
     margin-right: 20px;
   }
+
+.quill {
+    height: 95.2%;
+    border: none !important;
+    color: #fff !important;
+}
+.ql-container.ql-snow,
+.ql-toolbar.ql-snow   {
+    border : none !important;
+}
+.ql-toolbar.ql-snow {
+    color: #fff !important;
+    background: #7a7a7e;
+    border-left: 2px solid#929297!important;
+}
+.ql-container.ql-snow {
+    background: #7a7a7e;
+    font-size: 1.5em;
+    border-left: 2px solid#929297 !important;
+}

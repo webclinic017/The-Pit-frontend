@@ -34,6 +34,8 @@ export default function App() {
 			<Switch>
 				<PublicRoute restricted={false} component={Home} path="/" exact />
 				<PrivateRoute component={DashBoard} path="/dashboard" exact />
+				<PrivateRoute component={DashBoard} path="/dashboard/notebooks/:id" exact />
+				<PrivateRoute component={DashBoard} path="/dashboard/notes/:id" exact />
 				<PrivateRoute component={ChatRoom} path="/dashboard/chatrooms" exact />
 				<PrivateRoute component={ChatRoom} path="/dashboard/chatrooms/:id" exact />
 			</Switch>

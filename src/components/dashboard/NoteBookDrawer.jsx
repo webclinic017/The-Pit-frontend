@@ -1,4 +1,4 @@
-import { Fragment, useRef } from 'react';
+import { Fragment, useState } from 'react';
 import {
 	Drawer,
 	DrawerBody,
@@ -13,61 +13,87 @@ import {
 	Text,
 	Heading
 } from '@chakra-ui/react';
+import 'react-quill/dist/quill.snow.css';
+import ReactQuill from 'react-quill';
+import { Link } from 'react-router-dom';
+
+// components
+import { NoteBookForm } from '../notebooks/NoteBookForm';
+import { NoteBookList } from '../notebooks/NoteBookList';
+import { NoteList } from '../notebooks/NoteList';
 
 export function NoteBookDrawer({ isOpen, onClose, btnRef }) {
+	const [ text, setText ] = useState('');
+	const [ newNoteBook, setNewNoteBook ] = useState([]);
+	const [ notes, setNotes ] = useState([]);
+
+	const handleNewNoteBook = (newnotebook) => {
+		setNewNoteBook([ newnotebook ]);
+	};
+
+	const handleOnClickNoteBook = (e) => {
+		setNotes((prev) => []);
+
+		const noteBookId = e.target.baseURI.split('')[e.target.baseURI.split('').length - 1];
+
+		fetch('http://localhost:3000/api/v1/notes').then((res) => res.json()).then(({ data }) => {
+			let result = [];
+
+			data.map((note) => {
+				if (String(note.attributes['note-book-id']) === String(noteBookId)) {
+					return result.push(note);
+				}
+				return result;
+			});
+
+			setNotes(result);
+		});
+	};
+
+	const handleNoteEdit = (e) => {
+		const noteId = e.target.baseURI.split('/')[e.target.baseURI.split('/').length - 1];
+
+		fetch(`http://localhost:3000/api/v1/notes/${noteId}`).then((res) => res.json()).then(({ data }) => {
+			setText(data.attributes.paragraph);
+		});
+	};
+
 	return (
 		<Fragment>
 			<Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef} size="xl">
 				<DrawerOverlay />
 				<DrawerContent padding="none !important" bg="#23252A">
 					<DrawerCloseButton />
-					<DrawerHeader>Pit Note</DrawerHeader>
+					<DrawerHeader>The Pit Notes</DrawerHeader>
 
 					<DrawerBody padding="none !important">
 						<Grid gridTemplateColumns="20% 30% 1fr" h="100%">
 							<Grid justifyContent="center" gridTemplateRows="8% 1fr">
 								<Box>
-									<Input
-										w="140px"
-										border="none"
-										bg="#37373B !important"
-										h="40px"
-										color="#677D9B"
-										type="text"
-										name="search"
-										placeholder="new notebook"
-									/>
+									<NoteBookForm handleNewNoteBook={handleNewNoteBook} />
 								</Box>
 								<Box pl=".5em">
 									<Heading mb="1em" fontSize="1.2em" fontWeight="bold">
 										NoteBooks
 									</Heading>
-									<Box>USD/EUR</Box>
+									<NoteBookList
+										handleOnClickNoteBook={handleOnClickNoteBook}
+										newNoteBook={newNoteBook[0]}
+									/>
 								</Box>
 							</Grid>
-							<Box bg="#37373B" padding=".5em" overflowY="scroll" ov>
-								<Box
-									boxShadow="md"
-									p="6"
-									rounded="md"
-									bg="#23252A"
-									padding="1em"
-									h="200px"
-									w="100%"
-									borderRadius="5px"
-									mt="1em"
-									mb="1em"
-								>
-									<Heading mb="1em" fontSize="1.2em" fontWeight="bold">
-										The pit is going up
-									</Heading>
-									<Text fontSize=".9em" color="#ccc5c5">
-										Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem consequatur
-										voluptatum provident quae. Ipsa odit tempora
-									</Text>
-								</Box>
+							<Box bg="#7a7a7e" padding=".5em" overflowY="scroll">
+								{notes.map((note) => {
+									return (
+										<Link to={`/dashboard/notes/${note.id}`}>
+											<NoteList handleNoteEdit={handleNoteEdit} key={note.id} note={note} />
+										</Link>
+									);
+								})}
 							</Box>
-							<Box />
+							<Box>
+								<ReactQuill theme="snow" value={text} onChange={setText} />
+							</Box>
 						</Grid>
 					</DrawerBody>
 
