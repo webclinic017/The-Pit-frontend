@@ -1,7 +1,8 @@
 import {
     CURRENT_USER,
     SIGN_UP,
-    FETCH_USER_BY_TOKEN
+    FETCH_USER_BY_TOKEN,
+    PATCH_CURRENT_USER
 } from '../actions/types'
 
 const initialState = {
@@ -24,7 +25,11 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state, user: action.payload
             };
-        default:
-            return state;
+        case PATCH_CURRENT_USER:
+            return {
+                ...state, user: action.payload
+            }
+            default:
+                return state;
     }
 }

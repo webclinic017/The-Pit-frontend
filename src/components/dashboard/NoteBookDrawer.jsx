@@ -32,22 +32,15 @@ export function NoteBookDrawer({ isOpen, onClose, btnRef }) {
 	};
 
 	const handleOnClickNoteBook = (e) => {
-		setNotes((prev) => []);
+		const noteBookId = e.target.baseURI.split('/')[e.target.baseURI.split('/').length - 1];
 
-		const noteBookId = e.target.baseURI.split('')[e.target.baseURI.split('').length - 1];
-
-		fetch('http://localhost:3000/api/v1/notes').then((res) => res.json()).then(({ data }) => {
-			let result = [];
-
-			data.map((note) => {
-				if (String(note.attributes['note-book-id']) === String(noteBookId)) {
-					return result.push(note);
-				}
-				return result;
+		fetch(`http://localhost:3000/api/v1/note_books/${noteBookId}`)
+			.then((res) => res.json())
+			.then(({ included }) => {
+				console.log(notes);
+				console.log(included);
+				setNotes(included);
 			});
-
-			setNotes(result);
-		});
 	};
 
 	const handleNoteEdit = (e) => {

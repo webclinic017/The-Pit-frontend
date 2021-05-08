@@ -4,6 +4,7 @@
 export const CURRENT_USER = 'CURRENT_USER'
 export const FETCH_USER_BY_TOKEN = 'FETCH_USER_BY_TOKEN'
 export const SIGN_UP = 'SIGN_UP'
+export const PATCH_CURRENT_USER = 'PATCH_CURRENT_USER'
 /* 
     ROOMS
 */
