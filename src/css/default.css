@@ -52,7 +52,7 @@ img {
     margin-right: 20px;
   }
 
-.quill {
+.quill-notebook  {
     height: 95.2%;
     border: none !important;
     color: #fff !important;
@@ -61,13 +61,25 @@ img {
 .ql-toolbar.ql-snow   {
     border : none !important;
 }
-.ql-toolbar.ql-snow {
+.quill-notebook > .ql-toolbar.ql-snow {
     color: #fff !important;
     background: #7a7a7e;
     border-left: 2px solid#929297!important;
 }
-.ql-container.ql-snow {
+
+.quill-notebook > .ql-container.ql-snow {
     background: #7a7a7e;
     font-size: 1.5em;
     border-left: 2px solid#929297 !important;
 }
+
+.quill-message > .ql-toolbar.ql-snow  {
+    color: #fff !important;
+    background: #fff;
+    border-radius: 5px;
+}
+
+.quill-message > .ql-container.ql-snow {
+    background: #23252A;
+    font-size: 1.2em;
+} 

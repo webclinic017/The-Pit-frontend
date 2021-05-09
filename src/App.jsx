@@ -14,7 +14,6 @@ import { fetchUserBytoken } from './redux/actions/users';
 // pages
 import Home from './pages/Home';
 import DashBoard from './pages/DashBoard';
-import ChatRoom from './pages/ChatRoom';
 // utils
 import { isLogin } from './utils/detect-auth';
 
@@ -36,8 +35,6 @@ export default function App() {
 				<PrivateRoute component={DashBoard} path="/dashboard" exact />
 				<PrivateRoute component={DashBoard} path="/dashboard/notebooks/:id" exact />
 				<PrivateRoute component={DashBoard} path="/dashboard/notes/:id" exact />
-				<PrivateRoute component={ChatRoom} path="/dashboard/chatrooms" exact />
-				<PrivateRoute component={ChatRoom} path="/dashboard/chatrooms/:id" exact />
 			</Switch>
 		</ChakraProvider>
 	);

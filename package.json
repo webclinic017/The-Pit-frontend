@@ -27,6 +27,7 @@
     "d3-time-format": "^3.0.0",
     "formik": "^2.2.6",
     "framer-motion": "^4",
+    "interweave": "^12.7.1",
     "prop-types": "^15.7.2",
     "pusher-js": "^7.0.3",
     "react": "^17.0.2",
@@ -73,7 +74,10 @@
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
     "pure-react-carousel": "^1.27.6",
+    "react-moment": "^1.1.1",
     "redux-devtools-extension": "^2.13.9"
   }
 }

@@ -18,16 +18,21 @@ import {
 	PopoverCloseButton,
 	useDisclosure
 } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
 
 // component
 import { NoteBookDrawer } from './NoteBookDrawer';
 import { SettingsDrawer } from './SettingsDrawer';
+import { MessageDrawer } from './MessageDrawer';
 
 export function NavBar({ pairs, selectSort, handleGlobalChange }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const { isOpen: isOpenOne, onOpen: onOpenOne, onClose: onCloseOne } = useDisclosure();
+	const { isOpen: isOpenTwo, onOpen: onOpenTwo, onClose: onCloseTwo } = useDisclosure();
 	const btnRef = useRef();
 	const btnOneRef = useRef();
+	const btnTwoRef = useRef();
+	const { user } = useSelector((state) => state.users);
 
 	let average = (array) => array.reduce((a, b) => a + b) / array.length;
 	let avgHigh = pairs.map((pair) => parseFloat(pair.h));
@@ -121,37 +126,49 @@ export function NavBar({ pairs, selectSort, handleGlobalChange }) {
 					</Box>
 				</HStack>
 			</Flex>
-			<HStack spacing="25px">
-				<Popover>
-					<PopoverTrigger>
-						<Button
-							bg="none"
-							outline="none !important"
-							border="none"
-							_hover={{ outline: 'none', backgroundColor: 'none' }}
-							_active={{ outline: 'none', backgroundColor: 'none' }}
-						>
-							<HelpCircle size="1.2em" />
-						</Button>
-					</PopoverTrigger>
-					<PopoverContent bg="#37373B" color="#fff !important" border="none" outline="none">
-						<PopoverArrow />
-						<PopoverCloseButton />
-						<PopoverHeader>What is The Pit?</PopoverHeader>
-						<PopoverBody>
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi doloribus nesciunt ullam
-							odit veritatis vel expedita earum, amet eum nemo hic, voluptas, architecto mollitia sed qui
-							explicabo quaerat ut. Itaque
-						</PopoverBody>
-					</PopoverContent>
-				</Popover>
-				<MessageCircle size="1.2em" />
-				<Book size="1.2em" ref={btnRef} onClick={onOpen} style={{ cursor: 'pointer' }} />
-				<NoteBookDrawer isOpen={isOpen} onClose={onClose} btnRef={btnRef} />
-				<Bell size="1.2em" />
-				<Settings size="1.2em" onClick={onOpenOne} btnOneRef={btnOneRef} style={{ cursor: 'pointer' }} />
-				<SettingsDrawer isOpenOne={isOpenOne} onCloseOne={onCloseOne} btnOneRef={btnOneRef} />
-			</HStack>
+			<Flex alignItems="center">
+				<HStack spacing="25px" mr="3em">
+					<Popover>
+						<PopoverTrigger>
+							<Button
+								bg="none"
+								outline="none !important"
+								border="none"
+								_hover={{ outline: 'none', backgroundColor: 'none' }}
+								_active={{ outline: 'none', backgroundColor: 'none' }}
+							>
+								<HelpCircle size="1.2em" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent bg="#37373B" color="#fff !important" border="none" outline="none">
+							<PopoverArrow />
+							<PopoverCloseButton />
+							<PopoverHeader>What is The Pit?</PopoverHeader>
+							<PopoverBody>
+								Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi doloribus nesciunt
+								ullam odit veritatis vel expedita earum, amet eum nemo hic, voluptas, architecto
+								mollitia sed qui explicabo quaerat ut. Itaque
+							</PopoverBody>
+						</PopoverContent>
+					</Popover>
+					<MessageCircle size="1.2em" ref={btnTwoRef} onClick={onOpenTwo} style={{ cursor: 'pointer' }} />
+					<MessageDrawer isOpenTwo={isOpenTwo} onCloseTwo={onCloseTwo} btnTwoRef={btnTwoRef} />
+
+					<Book size="1.2em" ref={btnRef} onClick={onOpen} style={{ cursor: 'pointer' }} />
+					<NoteBookDrawer isOpen={isOpen} onClose={onClose} btnRef={btnRef} />
+
+					<Bell size="1.2em" />
+
+					<Settings size="1.2em" onClick={onOpenOne} btnOneRef={btnOneRef} style={{ cursor: 'pointer' }} />
+					<SettingsDrawer isOpenOne={isOpenOne} onCloseOne={onCloseOne} btnOneRef={btnOneRef} />
+				</HStack>
+				<Flex alignItems="center">
+					<Heading fontSize="1em" mr="1em">
+						{user.name}
+					</Heading>
+					<Box bg="#3fa859" h="30px" w="30px" borderRadius="50px" />
+				</Flex>
+			</Flex>
 		</Flex>
 	);
 }

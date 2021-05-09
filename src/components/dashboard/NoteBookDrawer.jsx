@@ -85,7 +85,7 @@ export function NoteBookDrawer({ isOpen, onClose, btnRef }) {
 								})}
 							</Box>
 							<Box>
-								<ReactQuill theme="snow" value={text} onChange={setText} />
+								<ReactQuill className="quill-notebook" theme="snow" value={text} onChange={setText} />
 							</Box>
 						</Grid>
 					</DrawerBody>
