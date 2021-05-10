@@ -24,14 +24,16 @@ import { useSelector } from 'react-redux';
 import { NoteBookDrawer } from './NoteBookDrawer';
 import { SettingsDrawer } from './SettingsDrawer';
 import { MessageDrawer } from './MessageDrawer';
-
+import { NotificationsDrawer } from './NotificationsDrawer';
 export function NavBar({ pairs, selectSort, handleGlobalChange }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const { isOpen: isOpenOne, onOpen: onOpenOne, onClose: onCloseOne } = useDisclosure();
 	const { isOpen: isOpenTwo, onOpen: onOpenTwo, onClose: onCloseTwo } = useDisclosure();
+	const { isOpen: isOpenThree, onOpen: onOpenThree, onClose: onCloseThree } = useDisclosure();
 	const btnRef = useRef();
 	const btnOneRef = useRef();
 	const btnTwoRef = useRef();
+	const btnThreeRef = useRef();
 	const { user } = useSelector((state) => state.users);
 
 	let average = (array) => array.reduce((a, b) => a + b) / array.length;
@@ -157,7 +159,12 @@ export function NavBar({ pairs, selectSort, handleGlobalChange }) {
 					<Book size="1.2em" ref={btnRef} onClick={onOpen} style={{ cursor: 'pointer' }} />
 					<NoteBookDrawer isOpen={isOpen} onClose={onClose} btnRef={btnRef} />
 
-					<Bell size="1.2em" />
+					<Bell size="1.2em" ref={btnThreeRef} onClick={onOpenThree} style={{ cursor: 'pointer' }} />
+					<NotificationsDrawer
+						isOpenThree={isOpenThree}
+						onCloseThree={onCloseThree}
+						btnThreeRef={btnThreeRef}
+					/>
 
 					<Settings size="1.2em" onClick={onOpenOne} btnOneRef={btnOneRef} style={{ cursor: 'pointer' }} />
 					<SettingsDrawer isOpenOne={isOpenOne} onCloseOne={onCloseOne} btnOneRef={btnOneRef} />

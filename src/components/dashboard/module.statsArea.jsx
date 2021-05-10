@@ -1,15 +1,43 @@
-import { Grid, HStack, Box, Flex, Input, Stack, ButtonGroup, Button, Text, VStack } from '@chakra-ui/react';
+import {
+	Grid,
+	HStack,
+	Box,
+	Flex,
+	Input,
+	Stack,
+	ButtonGroup,
+	Button,
+	Text,
+	VStack,
+	Modal,
+	ModalOverlay,
+	ModalContent,
+	ModalHeader,
+	ModalFooter,
+	ModalBody,
+	ModalCloseButton,
+	useDisclosure,
+	FormControl
+} from '@chakra-ui/react';
 import { DollarSign } from 'react-feather';
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import toast from 'react-hot-toast';
-
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 // charts
 import { LineChart } from '../chart/LineChart';
 import { PieChart } from '../chart/PieChart';
 import { pieChartData } from '../chart/chartDataPoints';
 import { lineChartData } from '../chart/chartDataPoints';
+import { PATCH_CURRENT_USER } from '../../redux/actions/types';
+import { isLogin } from '../../utils/detect-auth';
 
 export function ModuleStatsArea({ pairs, id, currentPrice, setOrders, orders }) {
+	const { user } = useSelector((state) => state.users);
+	const dispatch = useDispatch();
+	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen: isOpenOne, onOpen: onOpenOne, onClose: onCloseOne } = useDisclosure();
+
 	return (
 		<Grid gridTemplateColumns="1fr 1fr" bg="#1E2025">
 			<Grid border="2px solid #37373B" gridTemplateRows="35% 35% 20%" bg="#1E2025">
@@ -151,18 +179,146 @@ export function ModuleStatsArea({ pairs, id, currentPrice, setOrders, orders }) 
 							Balance
 						</Text>
 						<HStack justifyContent="space-evenly" mt="1em">
-							<Button bg="transparent" color=" #90D647" border="1px solid #90D647" w="100%">
+							<Button
+								onClick={onOpen}
+								bg="transparent"
+								color=" #90D647"
+								border="1px solid #90D647"
+								w="100%"
+							>
 								Deposit
 							</Button>
-							<Button bg="transparent" w="100%" color="#304226" border="1px solid #304226">
+							<Modal isCentered onClose={onClose} isOpen={isOpen} motionPreset="slideInBottom">
+								<ModalOverlay />
+								<ModalContent bg="#2E3D2A">
+									<ModalHeader>Deposit</ModalHeader>
+									<ModalCloseButton />
+									<ModalBody>
+										<Formik
+											initialValues={{
+												name: user.name,
+												email: user.email,
+												balance: user.balance
+											}}
+											onSubmit={(values, { setSubmitting }) => {
+												setTimeout(() => {
+													fetch('http://localhost:3000/api/v1/currentuser', {
+														method: 'PATCH',
+														headers: {
+															'Content-Type': 'application/json',
+															Authorization: `Bearer ${isLogin()}`
+														},
+														body: JSON.stringify(values)
+													})
+														.then((res) => res.json())
+														.then((data) => {
+															dispatch({ type: PATCH_CURRENT_USER, payload: data });
+														});
+												}, 400);
+											}}
+										>
+											{({ values, isSubmitting, handleChange }) => (
+												<Form>
+													<Stack spacing="24px" mt="2em">
+														<FormControl>
+															<Field
+																className="form-input"
+																as={Input}
+																type="text"
+																value={values.balance}
+																name="balance"
+																onChange={handleChange}
+																placeholder="balance"
+															/>
+														</FormControl>
+														<Button bg="#23252A" type="submit" disabled={isSubmitting}>
+															update profile
+														</Button>
+													</Stack>
+												</Form>
+											)}
+										</Formik>
+									</ModalBody>
+									<ModalFooter>
+										<Button bg="transparent" mr={3} onClick={onClose}>
+											Close
+										</Button>
+									</ModalFooter>
+								</ModalContent>
+							</Modal>
+							<Button
+								onClick={onOpenOne}
+								bg="transparent"
+								w="100%"
+								color="#304226"
+								border="1px solid #304226"
+							>
 								withdrawal
 							</Button>
+							<Modal isCentered onClose={onCloseOne} isOpen={isOpenOne} motionPreset="slideInBottom">
+								<ModalOverlay />
+								<ModalContent bg="#2E3D2A">
+									<ModalHeader>Withdrawal</ModalHeader>
+									<ModalCloseButton />
+									<ModalBody>
+										<Formik
+											initialValues={{
+												name: user.name,
+												email: user.email,
+												balance: user.balance
+											}}
+											onSubmit={(values, { setSubmitting }) => {
+												setTimeout(() => {
+													fetch('http://localhost:3000/api/v1/currentuser', {
+														method: 'PATCH',
+														headers: {
+															'Content-Type': 'application/json',
+															Authorization: `Bearer ${isLogin()}`
+														},
+														body: JSON.stringify(values)
+													})
+														.then((res) => res.json())
+														.then((data) => {
+															dispatch({ type: PATCH_CURRENT_USER, payload: data });
+														});
+												}, 400);
+											}}
+										>
+											{({ values, isSubmitting, handleChange }) => (
+												<Form>
+													<Stack spacing="24px" mt="2em">
+														<FormControl>
+															<Field
+																className="form-input"
+																as={Input}
+																type="text"
+																value={values.balance}
+																name="balance"
+																onChange={handleChange}
+																placeholder="balance"
+															/>
+														</FormControl>
+														<Button bg="#23252A" type="submit" disabled={isSubmitting}>
+															update profile
+														</Button>
+													</Stack>
+												</Form>
+											)}
+										</Formik>
+									</ModalBody>
+									<ModalFooter>
+										<Button bg="transparent" mr={3} onClick={onCloseOne}>
+											Close
+										</Button>
+									</ModalFooter>
+								</ModalContent>
+							</Modal>
 						</HStack>
 						<Box w="100%" mt="2em">
 							<VStack>
 								<Flex justifyContent="space-between" w="100%">
 									<Text color="#677D9B ">Account:</Text>
-									<Text>${}</Text>
+									<Text>${user.balance}</Text>
 								</Flex>
 							</VStack>
 						</Box>

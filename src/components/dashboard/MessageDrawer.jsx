@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useCallback } from 'react';
+import { Fragment, useState } from 'react';
 import {
 	Drawer,
 	DrawerBody,
@@ -30,8 +30,6 @@ export function MessageDrawer({ isOpenTwo, onCloseTwo, btnTwoRef }) {
 		axios.post('http://localhost:5000/message', payload);
 	};
 
-	const grabAllUser = () => {};
-
 	return (
 		<Fragment>
 			<Drawer isOpen={isOpenTwo} placement="right" onClose={onCloseTwo} finalFocusRef={btnTwoRef} size="xl">
@@ -42,7 +40,7 @@ export function MessageDrawer({ isOpenTwo, onCloseTwo, btnTwoRef }) {
 
 					<DrawerBody padding="none !important">
 						<Grid h="100%" gridTemplateColumns="20% 1fr" gridTemplateRows="1fr">
-							<Box grabAllUser={grabAllUser} />
+							<Box />
 							<Grid h="100%" gridTemplateColumns="1fr" gridTemplateRows="1fr 25%">
 								<Box overflowX="hidden" overflowY="scroll" padding="2em" maxHeight="650px">
 									<Room />
