@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
 	Grid,
 	HStack,
@@ -17,7 +18,8 @@ import {
 	ModalBody,
 	ModalCloseButton,
 	useDisclosure,
-	FormControl
+	FormControl,
+	Heading
 } from '@chakra-ui/react';
 import { DollarSign } from 'react-feather';
 import { Formik, Form, Field } from 'formik';
@@ -25,18 +27,26 @@ import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 // charts
-import { LineChart } from '../chart/LineChart';
 import { PieChart } from '../chart/PieChart';
 import { pieChartData } from '../chart/chartDataPoints';
-import { lineChartData } from '../chart/chartDataPoints';
 import { PATCH_CURRENT_USER } from '../../redux/actions/types';
 import { isLogin } from '../../utils/detect-auth';
+import { BalanceChart } from '../chart/BalanceChart';
+import { New } from '../news/New';
+import { NewData } from '../chart/chartDataPoints.js';
 
 export function ModuleStatsArea({ pairs, id, currentPrice, setOrders, orders }) {
+	const [ news, setNews ] = useState([]);
 	const { user } = useSelector((state) => state.users);
 	const dispatch = useDispatch();
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const { isOpen: isOpenOne, onOpen: onOpenOne, onClose: onCloseOne } = useDisclosure();
+	useEffect(() => {
+		// fetch(`https://forexnewsapi.com/api/v1?currencypair=EUR-USD&items=50&token=${process.env.REACT_APP_NEWS}`)
+		// .then((res) => res.json())
+		// .then(({ data }) => setNews(data));
+		setNews(NewData.data);
+	}, []);
 
 	return (
 		<Grid gridTemplateColumns="1fr 1fr" bg="#1E2025">
@@ -44,19 +54,35 @@ export function ModuleStatsArea({ pairs, id, currentPrice, setOrders, orders }) 
 				<Box padding="1em 2em" bg="#1E2025">
 					<PieChart data={pieChartData} />
 				</Box>
-				<Box border="2px solid #37373B" borderLeft="none" borderRight="none">
-					<LineChart data={lineChartData} />
-				</Box>
-				<Box padding="1em 2em" overflowY="scroll">
-					{/* {[ ...pairs ].splice(1, 30).map((pair) => {
-                    return (
-                        <Flex key={pair._id} textAlign="center" justifyContent="space-between" w="100%">
-                            <Text>{pair.c}</Text>
-                            <Text>{pair.o}</Text>
-                            <Text>{pair.l}</Text>
-                        </Flex>
-                    );
-                })} */}
+				<Grid
+					h="100%"
+					gridTemplateRows="16% 1fr"
+					border="2px solid #37373B"
+					borderLeft="none"
+					borderRight="none"
+					position="relative"
+				>
+					<Box position="relative">
+						<Heading top="5" left="5" position="absolute" fontSize="1em" fontWeight="bold">
+							Day Chart
+						</Heading>
+					</Box>
+					<Box ml="1em">
+						<BalanceChart className="balance-chart" data={pairs} />
+					</Box>
+				</Grid>
+				<Box padding="1em 1em" h="270px">
+					<Heading mb="1em" fontSize="1em" fontWeight="bold">
+						Forex News
+					</Heading>
+					<Box maxHeight="230px" overflowY="scroll">
+						<VStack spacing="24px">
+							{news.length !== 0 &&
+								news.map((newInfo) => {
+									return <New news={newInfo} />;
+								})}
+						</VStack>
+					</Box>
 				</Box>
 			</Grid>
 			<Grid gridTemplateRows="20% 50% 30%">
@@ -119,6 +145,7 @@ export function ModuleStatsArea({ pairs, id, currentPrice, setOrders, orders }) 
 								})
 									.then((res) => res.json())
 									.then(({ data }) => {
+										console.log(data);
 										toast.success(`Order Filled - ${data.attributes.symbol}`);
 										setOrders([ ...orders, data ]);
 									})

@@ -15,6 +15,7 @@ import ReactQuill from 'react-quill';
 import { Send } from 'react-feather';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 // component
 import Room from '../messages/Room';
 
@@ -27,7 +28,14 @@ export function MessageDrawer({ isOpenTwo, onCloseTwo, btnTwoRef }) {
 			text: text,
 			username: user
 		};
-		axios.post('http://localhost:5000/message', payload);
+		axios
+			.post('http://localhost:5000/message', payload)
+			.then(function(response) {})
+			.catch(function(error) {})
+			.then(function(data) {
+				console.log(data);
+				setText('');
+			});
 	};
 
 	return (

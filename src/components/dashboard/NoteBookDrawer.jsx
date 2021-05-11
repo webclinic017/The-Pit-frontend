@@ -76,13 +76,14 @@ export function NoteBookDrawer({ isOpen, onClose, btnRef }) {
 								</Box>
 							</Grid>
 							<Box bg="#7a7a7e" padding=".5em" overflowY="scroll">
-								{notes.map((note) => {
-									return (
-										<Link to={`/dashboard/notes/${note.id}`}>
-											<NoteList handleNoteEdit={handleNoteEdit} key={note.id} note={note} />
-										</Link>
-									);
-								})}
+								{typeof notes !== 'undefined' &&
+									notes.map((note) => {
+										return (
+											<Link to={`/dashboard/notes/${note.id}`}>
+												<NoteList handleNoteEdit={handleNoteEdit} key={note.id} note={note} />
+											</Link>
+										);
+									})}
 							</Box>
 							<Box>
 								<ReactQuill className="quill-notebook" theme="snow" value={text} onChange={setText} />

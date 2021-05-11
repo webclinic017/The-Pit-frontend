@@ -67,7 +67,7 @@ export function NavBar({ pairs, selectSort, handleGlobalChange }) {
 					borderColor="transparent"
 					color="white"
 					onChange={handleGlobalChange}
-					placeholder="AUD/USD"
+					placeholder="EUR/JPY"
 				>
 					{selectSort.map((pair) => {
 						return (

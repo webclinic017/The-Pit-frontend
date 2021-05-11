@@ -1,6 +1,6 @@
 import { Component, Fragment } from 'react';
 import Pusher from 'pusher-js';
-
+import toast from 'react-hot-toast';
 // component
 import { Message } from './message';
 

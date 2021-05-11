@@ -1,41 +1,70 @@
-import { Grid, HStack, Box, Flex, Input, Text } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { Grid, HStack, Box, Flex, Input, Text, Heading } from '@chakra-ui/react';
 import TradingViewWidget, { Themes } from 'react-tradingview-widget';
+import { MainChart } from '../chart/MainChart';
+import { Orders } from '../Orders/Orders';
 
-export function ModuleChartArea({ abs, pairs, orders, handleCancel }) {
+export function ModuleChartArea({ abs, pairs, orders, chartData }) {
+	const [ losers, setLosers ] = useState([]);
+
+	useEffect(() => {
+		fetch(
+			`https://api.polygon.io/v2/snapshot/locale/global/markets/forex/gainers?&apiKey=${process.env
+				.REACT_APP_PLOYGON}`
+		)
+			.then((res) => res.json())
+			.then(({ tickers }) => {
+				setLosers(tickers);
+			});
+	}, []);
+
 	return (
 		<Grid gridTemplateRows="70% 30%">
-			<Grid gridTemplateColumns="30% 1fr">
+			<Grid gridTemplateColumns="28% 1fr">
 				<Box padding="2em">
-					<Input
-						w="140px"
-						border="none"
-						bg="#2C2E36  !important"
-						h="40px"
-						color="#677D9B"
-						as={Input}
-						type="text"
-						name="search"
-						placeholder="search"
-					/>
+					<Flex justifyContent="space-between" alignItems="center">
+						<Input
+							w="140px"
+							border="none"
+							bg="#2C2E36  !important"
+							h="40px"
+							color="#677D9B"
+							as={Input}
+							type="text"
+							name="search"
+							placeholder="search"
+						/>
+						<Heading fontSize="1em" fontWeight="bold">
+							Losers
+						</Heading>
+					</Flex>
 					<Flex mt="1em" textAlign="center" justifyContent="space-between" w="100%">
-						<Text color="#677D9B ">Price</Text>
-						<Text color="#677D9B ">Ask</Text>
-						<Text color="#677D9B ">Bid</Text>
+						<Text color="#677D9B ">Pair</Text>
+						<Text color="#677D9B ">High</Text>
+						<Text color="#677D9B ">Low</Text>
+						<Text color="#677D9B ">Chg%</Text>
 					</Flex>
 					<Box mt="1em" h="100%" maxHeight="450px" overflowY="scroll" overflowX="hidden">
-						{abs.reverse().map((askBid, index) => {
+						{losers.map((askBid, index) => {
 							return (
 								<Flex key={index} textAlign="center" justifyContent="space-between" w="100%">
-									<Text color="#fff">{pairs.length !== 0 && pairs.slice(-1)[0].c}</Text>
-									<Text color="#C85740">{askBid.a}</Text>
-									<Text color="#90D647 ">{askBid.b}</Text>
+									<Text color="#fff">{askBid.ticker.split(':')[1]}</Text>
+									<Text color="#fff">{askBid.day.h.toFixed(2)}</Text>
+									<Text color="#C85740">{askBid.day.l.toFixed(2)}</Text>
+									<Text color="#90D647 ">{askBid.todaysChangePerc.toFixed(2)}</Text>
 								</Flex>
 							);
 						})}
 					</Box>
 				</Box>
-				<Box>
-					<TradingViewWidget symbol="AUD/USD" theme={Themes.DARK} locale="fr" autosize />
+				<Box alignSelf="end">
+					<Box>
+						<Heading fontSize="1em" fontWeight="bold">
+							Minute Chart
+						</Heading>
+					</Box>
+					<MainChart data={chartData} />
+					{/* <TradingViewWidget symbol="AUD/USD" theme={Themes.DARK} locale="fr" autosize /> */}
 				</Box>
 			</Grid>
 			<Box padding="2em" border="2px solid #37373B">
@@ -89,22 +118,7 @@ export function ModuleChartArea({ abs, pairs, orders, handleCancel }) {
 				</Box>
 				<Box mt="1em" overflowY="scroll !important" height="130px !important">
 					{orders.map((order) => {
-						return (
-							<HStack key={order.id} spacing="90px">
-								<Text color="#677D9B ">{order.attributes['created-at'].split('T')[0]}</Text>
-								<Text ml="3em !important">{order.attributes.symbol}</Text>
-								<Text ml="5em !important">Limit</Text>
-								<Text color="#90D647" ml="7em !important">
-									Buy
-								</Text>
-								<Text ml="7em !important">{pairs.length !== 0 && pairs.slice(-1)[0].c}</Text>
-								<Text>{order.attributes.qty}</Text>
-								<Text>{order.attributes['avg-fill-price']}</Text>
-								<Text onClick={handleCancel} ml="6em !important">
-									Cancel
-								</Text>
-							</HStack>
-						);
+						return <Orders order={order} price={chartData[chartData.length - 1]} />;
 					})}
 				</Box>
 			</Box>

@@ -19,6 +19,7 @@ html, body {
     color: #fff !important ;
     position: relative;
     overflow-x:hidden;
+    overflow-y: hidden;
 }
 li {
     list-style-type: none;
@@ -83,3 +84,11 @@ img {
     background: #23252A;
     font-size: 1.2em;
 } 
+
+
+  
+  /* hiding first and last lines in cartesian grid */
+  .recharts-wrapper .recharts-cartesian-grid-horizontal line:first-child,
+  .recharts-wrapper .recharts-cartesian-grid-horizontal line:last-child {
+    stroke-opacity: 0;
+  }

@@ -23,26 +23,27 @@ function DashBoard() {
 		() => {
 			_isMounted.current = true;
 
-			const pusher = new Pusher(`b8f20a3d52d39b9262c2`, {
+			const pusher = new Pusher(`${process.env.REACT_APP_KEY}`, {
 				cluster: 'us2',
 				encrypted: true
 			});
 
 			const ticker = pusher.subscribe('ticker');
+			const forex = pusher.subscribe('forex');
+
 			ticker.bind('tick', (data) => {
 				console.log(data);
 				setABs((prevAbs) => [ ...prevAbs, data ]);
 			});
 
+			forex.bind('pair', (data) => {
+				setStartWS((prevWS) => [ ...prevWS, data ]);
+				// setPairs((prevPair) => [ ...prevPair, data ]);
+			});
+
 			if (_isMounted && pairs.length === 0) {
 				fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
 			}
-
-			// if (pairs.length !== 0) {
-			// 	setInterval(() => {
-			// 		fetch('http://localhost:5000/forex').then((res) => res.json()).then((data) => setPairs(data));
-			// 	}, 10000);
-			// }
 
 			if (pairs.length !== 0) return setCurrentPrice(pairs.slice(-1)[0].c);
 			/* 
@@ -53,7 +54,7 @@ function DashBoard() {
 
 			return () => (_isMounted.current = false);
 		},
-		[ pairs.length, pairs, startWS.length ]
+		[ pairs.length, pairs ]
 	);
 
 	useEffect(
@@ -75,7 +76,6 @@ function DashBoard() {
 					}
 					return result;
 				});
-
 				setOrders(result);
 			});
 		},
@@ -84,6 +84,7 @@ function DashBoard() {
 	/* 
 			unqiue array
 	*/
+
 	const selectSort = [ ...new Set(sorted) ];
 
 	const handleGlobalChange = (e) => {
@@ -96,15 +97,19 @@ function DashBoard() {
 		// });
 	};
 
-	const handleCancel = (e) => {};
-
 	return (
 		<Fragment>
 			<Grid h="100vh" gridTemplateRows="8% 1fr">
 				<NavBar pairs={pairs} selectSort={selectSort} />
 				<Grid gridTemplateColumns="1fr 40%" bg="#1E2025">
-					<ModuleChartArea abs={abs} pairs={pairs} handleCancel={handleCancel} orders={orders} />
-					<ModuleStatsArea id={id} setOrders={setOrders} pairs={pairs} currentPrice={currentPrice} />
+					<ModuleChartArea chartData={startWS} abs={abs} pairs={pairs} orders={orders} />
+					<ModuleStatsArea
+						id={id}
+						setOrders={setOrders}
+						orders={orders}
+						pairs={pairs}
+						currentPrice={currentPrice}
+					/>
 				</Grid>
 			</Grid>
 		</Fragment>
